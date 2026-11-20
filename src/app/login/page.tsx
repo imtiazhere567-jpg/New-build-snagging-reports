@@ -10,6 +10,7 @@ import { AccountSelect, type AccountOption } from "@/components/ui/account-selec
 import { useStore } from "@/lib/data/store";
 import { useSignOutNotice } from "@/components/shell/account-menu";
 import { useHydrated } from "@/lib/data/use-hydrated";
+import { loadLive } from "@/lib/data/live-client";
 import { propertyStage } from "@/lib/data/queries";
 import { TRADE_LABEL } from "@/lib/constants";
 import { isDemo, isLive } from "@/lib/config";
@@ -38,6 +39,24 @@ function Login() {
   const [sendError, setSendError] = useState<string | null>(params.get("error") === "link" ? "That sign-in link has expired or was already replaced. Ask for a new one below." : null);
   const [sending, setSending] = useState(false);
   const [setupNeeded, setSetupNeeded] = useState(false);
+  // Live site filled with sample data: pick a sample account instead of using email
+  const [liveAccounts, setLiveAccounts] = useState<AccountOption[] | null>(null);
+  useEffect(() => {
+    if (!isLive) return;
+    fetch("/api/demo")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b: { enabled?: boolean; accounts?: AccountOption[] } | null) => setLiveAccounts(b?.enabled ? (b.accounts ?? []) : null))
+      .catch(() => {});
+  }, []);
+  const enterLive = async (userId: string) => {
+    const res = await fetch("/api/demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ userId }) });
+    const body = (await res.json().catch(() => ({}))) as { role?: Role; error?: string };
+    if (!res.ok || !body.role) return setSendError(body.error ?? "Couldn't open that account.");
+    useSignOutNotice.getState().set(false);
+    await loadLive();
+    router.push(HOME[body.role]);
+  };
+  const pickerOptions = isDemo ? null : liveAccounts;
 
   // Live: already signed in -> straight to your screens; brand-new system -> offer setup
   const me = state.users.find((u) => u.id === state.currentUserId);
@@ -201,7 +220,7 @@ function Login() {
               </form>
 
               {/* Demo accounts */}
-              {isDemo && (
+              {(isDemo || pickerOptions) && (
                 <>
                   <div className="my-8 flex items-center gap-3 text-[12px] font-medium text-faint">
                     <span className="h-px flex-1 bg-line" />
@@ -213,11 +232,11 @@ function Login() {
                     <div className="mb-3 flex items-center justify-between">
                       <label className="text-[13px] font-medium text-ink-2">Demo account</label>
                       <span className="inline-flex items-center gap-1 rounded-full bg-brand-50 px-2 py-0.5 text-[10.5px] font-semibold uppercase tracking-wider text-brand-700">
-                        <FlaskConical className="size-3" /> {state.users.length} accounts
+                        <FlaskConical className="size-3" /> {pickerOptions ? pickerOptions.length : state.users.length} accounts
                       </span>
                     </div>
-                    <AccountSelect options={accounts} value={demoUser} onChange={setDemoUser} />
-                    <Button size="lg" className="mt-3 w-full" disabled={!demoUser} onClick={() => demoUser && enterAs(demoUser)}>
+                    <AccountSelect options={pickerOptions ?? accounts} value={demoUser} onChange={setDemoUser} />
+                    <Button size="lg" className="mt-3 w-full" disabled={!demoUser} onClick={() => demoUser && (isDemo ? enterAs(demoUser) : void enterLive(demoUser))}>
                       Continue to demo <ArrowRight className="size-4" />
                     </Button>
                   </div>

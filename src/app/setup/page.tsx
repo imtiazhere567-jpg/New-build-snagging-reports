@@ -28,12 +28,17 @@ export default function SetupPage() {
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = async (e: React.FormEvent | null, sample = false) => {
+    e?.preventDefault();
+    if (sample && status && status !== "error" && status.keyRequired && !form.setupKey) return setError("Enter the setup key first.");
     setSaving(true);
     setError(null);
     try {
-      const res = await fetch("/api/setup", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form) });
+      const res = await fetch("/api/setup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(sample ? { sample: true, setupKey: form.setupKey } : form),
+      });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
       if (!res.ok) return setError(body.error ?? "Setup failed. Please try again.");
       await loadLive();
@@ -86,6 +91,16 @@ export default function SetupPage() {
             <Button type="submit" className="mt-5 h-12 w-full text-[15px]" disabled={saving}>
               {saving ? "Setting up…" : <>Create my company <ArrowRight className="size-4" /></>}
             </Button>
+
+            <div className="mt-8 rounded-2xl border border-dashed border-line-strong p-4">
+              <p className="text-[13.5px] font-semibold">Or fill it with sample data</p>
+              <p className="mt-1 text-[12.5px] leading-relaxed text-muted">
+                Loads a sample company with an admin, 6 home owners and 7 technicians, with reports, quotes and payments. Anyone can then open those accounts from the sign-in page. Use this for a demo, not for a real business.
+              </p>
+              <Button type="button" variant="secondary" className="mt-3 w-full" disabled={saving} onClick={() => void submit(null, true)}>
+                Load sample data
+              </Button>
+            </div>
           </form>
         )}
       </div>

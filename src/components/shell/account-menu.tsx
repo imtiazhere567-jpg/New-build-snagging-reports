@@ -8,6 +8,7 @@ import { ChevronsUpDown, LogOut, Repeat2, Settings } from "lucide-react";
 import { Avatar } from "@/components/ui/primitives";
 import { useStore } from "@/lib/data/store";
 import { isDemo } from "@/lib/config";
+import { useLive } from "@/lib/data/live-client";
 import { TRADE_LABEL } from "@/lib/constants";
 import type { User } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const ROLE_LABEL = { contractor: "Contractor (admin)", owner: "Home owner", team
  */
 export function AccountMenu({ user, variant }: { user: User; variant: "sidebar" | "avatar" }) {
   const router = useRouter();
+  const liveDemo = useLive((s) => s.demo);
   const signOut = useStore((s) => s.signOut);
   const company = useStore((s) => s.settings.name);
   const [open, setOpen] = useState(false);
@@ -110,7 +112,7 @@ export function AccountMenu({ user, variant }: { user: User; variant: "sidebar" 
                 <Settings className="size-4 text-muted" /> Settings
               </Link>
             )}
-            {isDemo && (
+            {(isDemo || liveDemo) && (
               <button role="menuitem" onClick={doSwitch} className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-medium text-ink-2 hover:bg-sunken">
                 <Repeat2 className="size-4 text-muted" /> Switch account
                 <span className="ml-auto rounded bg-sunken px-1.5 text-[10.5px] font-semibold text-muted uppercase">Demo</span>

@@ -16,7 +16,7 @@ import { isLive } from "../config";
 import { recordIds } from "../utils";
 import { toast } from "@/components/ui/toast";
 
-export const useLive = create<{ ready: boolean }>(() => ({ ready: false }));
+export const useLive = create<{ ready: boolean; demo: boolean }>(() => ({ ready: false, demo: false }));
 
 let pending = 0;
 let queue: Promise<unknown> = Promise.resolve();
@@ -34,8 +34,9 @@ export function loadLive(): Promise<void> {
       if (pending > 0) return; // an action's answer will bring fresher data
       if (res.status === 401) applyServerState(emptyState(), null);
       else if (res.ok) {
-        const { state, userId } = (await res.json()) as { state: DemoState; userId: string };
+        const { state, userId, demo } = (await res.json()) as { state: DemoState; userId: string; demo?: boolean };
         applyServerState(state, userId);
+        useLive.setState({ demo: !!demo });
       }
     } catch {
       // Offline: keep what we have
