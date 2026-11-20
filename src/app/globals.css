@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+/*
+ * SnagSnap design tokens.
+ * Warm stone surfaces, deep-teal brand, near-black ink.
+ * Severity colours follow the spec: Safety red, Major orange, Minor amber, Cosmetic grey.
+ */
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --color-canvas: #f6f5f1;
+  --color-surface: #ffffff;
+  --color-sunken: #efede7;
+  --color-line: #e6e3db;
+  --color-line-strong: #d6d2c7;
+
+  --color-ink: #15181c;
+  --color-ink-2: #3b4048;
+  --color-muted: #6b7079;
+  --color-faint: #9a9ea6;
+
+  --color-brand-50: #ecf6f3;
+  --color-brand-100: #d2ebe4;
+  --color-brand-200: #a6d6c9;
+  --color-brand-300: #6fb9a8;
+  --color-brand-400: #3f9a87;
+  --color-brand-500: #1f7f6d;
+  --color-brand-600: #12695a;
+  --color-brand-700: #0f5449;
+  --color-brand-800: #0d433b;
+  --color-brand-900: #0b3530;
+
+  --color-night: #101513;
+  --color-night-2: #1a211e;
+  --color-night-3: #26302c;
+
+  --color-highlight: #d9f26b;
+
+  --color-sev-safety: #dc2626;
+  --color-sev-major: #ea580c;
+  --color-sev-minor: #d97706;
+  --color-sev-cosmetic: #6b7280;
+
+  --shadow-card: 0 1px 2px rgb(21 24 28 / 0.04), 0 1px 1px rgb(21 24 28 / 0.03);
+  --shadow-lift: 0 10px 30px -12px rgb(21 24 28 / 0.18), 0 2px 6px -2px rgb(21 24 28 / 0.06);
+
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-in {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-feature-settings: "ss01", "cv11";
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Subtle architectural grid used on hero / empty areas */
+.bg-blueprint {
+  background-image:
+    linear-gradient(to right, rgb(21 24 28 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(21 24 28 / 0.045) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bg-blueprint-dark {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Hide the browser's number spinners; prices are typed. */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
